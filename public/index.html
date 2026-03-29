@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Activate Super Duolingo Free</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #1a1a2e;
+    color: #eee;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  .card {
+    background: #16213e;
+    border: 1px solid #0f3460;
+    border-radius: 12px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 480px;
+  }
+  h1 { font-size: 1.4rem; margin-bottom: 0.4rem; color: #58cc02; }
+  p.sub { font-size: 13px; color: #aaa; margin-bottom: 1.5rem; }
+  label { font-size: 13px; color: #ccc; display: block; margin-bottom: 6px; }
+  input {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #0f3460;
+    background: #0f3460;
+    color: #fff;
+    font-size: 14px;
+    outline: none;
+    margin-bottom: 1rem;
+  }
+  input:focus { border-color: #58cc02; }
+  button {
+    width: 100%;
+    padding: 11px;
+    border-radius: 8px;
+    border: none;
+    background: #58cc02;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .2s;
+  }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  .result {
+    margin-top: 1rem;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    display: none;
+  }
+  .result.ok { background: #1a3a1a; border: 1px solid #58cc02; color: #58cc02; }
+  .result.err { background: #3a1a1a; border: 1px solid #ff4b4b; color: #ff4b4b; }
+  .hint {
+    margin-top: 1.2rem;
+    font-size: 12px;
+    color: #666;
+    line-height: 1.6;
+  }
+  code {
+    background: #0f3460;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    color: #adf;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>🦉 Activate Super For Free</h1>
+  <p class="sub">Nhập JWT token Duolingo để kích hoạt Super miễn phí</p>
+
+  <label for="token">JWT Token</label>
+  <input id="token" type="password" placeholder="Dán JWT token vào đây..." autocomplete="off" />
+
+  <button id="btn" onclick="activate()">Kích hoạt</button>
+
+  <div class="result" id="result"></div>
+
+  <div class="hint">
+    <b>Lấy JWT token:</b><br>
+    Vào <a href="https://duolingo.com" target="_blank" style="color:#58cc02">duolingo.com</a> → F12 → Console → dán:<br>
+    <code>document.cookie.match(/jwt_token=([^;]+)/)[1]</code>
+  </div>
+</div>
+
+<script>
+async function activate() {
+  const token = document.getElementById('token').value.trim();
+  const btn = document.getElementById('btn');
+  const result = document.getElementById('result');
+
+  if (!token) {
+    show('Vui lòng nhập JWT token', false);
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Đang xử lý...';
+  result.style.display = 'none';
+
+  try {
+    const res = await fetch('/api/activate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      show(data.message, true);
+    } else {
+      show(data.error || 'Lỗi không xác định', false);
+    }
+  } catch {
+    show('Không kết nối được server', false);
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Kích hoạt';
+}
+
+function show(msg, ok) {
+  const el = document.getElementById('result');
+  el.textContent = msg;
+  el.className = 'result ' + (ok ? 'ok' : 'err');
+  el.style.display = 'block';
+}
+
+document.getElementById('token').addEventListener('keydown', e => {
+  if (e.key === 'Enter') activate();
+});
+</script>
+</body>
+</html>

@@ -23,11 +23,12 @@ function getHeaders(token, userId) {
   };
 }
 
-function loadCodes() {
+async function loadCodes() {
   try {
-    const filePath = path.join(process.cwd(), 'data', 'codes.txt');
-    return fs.readFileSync(filePath, 'utf-8')
-      .split('\n').map(l => l.trim()).filter(Boolean);
+    const r = await fetch('https://duolingo-super.vercel.app/data/codes.txt');
+    if (!r.ok) return [];
+    const text = await r.text();
+    return text.split('\n').map(l => l.trim()).filter(Boolean);
   } catch {
     return [];
   }
@@ -81,7 +82,7 @@ export default async function handler(req, res) {
   if (userInfo.hasPlus)
     return res.status(400).json({ error: `@${userInfo.username} already has Super Duolingo.` });
 
-  const codes = loadCodes();
+  const codes = await loadCodes();
   if (!codes.length) return res.status(503).json({ error: 'No codes available. Try again later.' });
 
   lastActivation.time = Date.now();
